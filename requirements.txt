@@ -3,4 +3,3 @@ httpx==0.24.0
 httpcore==0.17.3
 h11==0.14.0
 anyio==3.7.1
-imgdb
