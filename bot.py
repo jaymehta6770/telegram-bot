@@ -12,7 +12,7 @@ from telegram.ext import (
     filters,
 )
 
-BOT_TOKEN = "8312368923:AAGID7Dbu3DL3TYydEzNsw_HkgiA9vq9Dx8"
+BOT_TOKEN = "8312368923:AAHBPMyhe-8dDq8Mnxf6QNKa4yn2wtoQxfc"
 DB_FILE = "database.json"
 
 # -------------------------
@@ -154,5 +154,6 @@ application.add_handler(CallbackQueryHandler(send_quality))
 
 print("Bot running (Permanent DB version)...")
 application.run_polling() # 'app' ki jagah 'application'
+
 
 
