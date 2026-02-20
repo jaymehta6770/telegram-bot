@@ -1,4 +1,4 @@
-from telegram.ext import Update
+from telegram import Update
 import re
 import json
 import os
@@ -153,6 +153,7 @@ application.add_handler(CallbackQueryHandler(send_quality))
 
 print("Bot running (Permanent DB version)...")
 application.run_polling() # 'app' ki jagah 'application'
+
 
 
 
