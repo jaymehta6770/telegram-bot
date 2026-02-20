@@ -1,5 +1,5 @@
 python-telegram-bot==20.3
-httpx==0.23.3
+httpx==0.24.0
 anyio==3.7.1
 h11==0.14.0
 imgdb
