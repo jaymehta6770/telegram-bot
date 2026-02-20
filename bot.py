@@ -12,7 +12,7 @@ from telegram.ext import (
 )
 
 # @BotFather se naya token lekar yahan dalein
-BOT_TOKEN = "BOT_TOKEN" 
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 DB_FILE = "database.json"
 
 # -------------------------
