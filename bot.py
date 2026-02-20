@@ -145,12 +145,14 @@ async def send_quality(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # -------------------------
 # APP
 # -------------------------
-app = ApplicationBuilder().token(BOT_TOKEN).build()
+# APP Initialization
+application = ApplicationBuilder().token(BOT_TOKEN).build() # 'app' ki jagah 'application' use karein
 
-app.add_handler(MessageHandler(filters.UpdateType.CHANNEL_POST, auto_save))
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CallbackQueryHandler(send_quality))
+application.add_handler(MessageHandler(filters.UpdateType.CHANNEL_POST, auto_save))
+application.add_handler(CommandHandler("start", start))
+application.add_handler(CallbackQueryHandler(send_quality))
 
 print("Bot running (Permanent DB version)...")
-app.run_polling()
+application.run_polling() # 'app' ki jagah 'application'
+
 
