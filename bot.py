@@ -124,6 +124,6 @@ application.add_handler(CallbackQueryHandler(send_quality))
 # Sabhi types ke messages/posts ke liye filters.ALL
 application.add_handler(MessageHandler(filters.ALL, auto_save))
 
-if name == 'main':
+if __name__ == "__main__":
     print("Bot is starting on NEW SERVICE...")
     application.run_polling()
