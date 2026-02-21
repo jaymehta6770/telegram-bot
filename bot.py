@@ -110,7 +110,10 @@ async def send_quality(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.message.reply_text(f"Sending {quality} episodes...")
 for ep in sorted(files.keys(), key=lambda x: int(x)):
+        # ૧. પહેલા લખાણ (Caption) તૈયાર કરો
         cap = f"✨ {series.upper()} - EP {ep}\n🎬 Quality: {quality}\n🚀 Powered by @MAKIMA6N_BOT"
+        
+        # ૨. પછી વિડિયો મોકલતી વખતે તે Caption નો ઉપયોગ કરો
         await query.message.reply_video(video=files[ep], caption=cap)
 # -------------------------
 # APP INITIALIZATION
