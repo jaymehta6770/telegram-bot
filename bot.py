@@ -109,10 +109,9 @@ async def send_quality(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await query.message.reply_text(f"Sending {quality} episodes...")
-    for ep in sorted(files.keys(), key=lambda x: int(x)):
-       cap = f"✨ {series.upper()} - EP {ep}\n🎬 Quality: {quality}\n🚀 Powered by @MAKIMA6N_BOT"
+for ep in sorted(files.keys(), key=lambda x: int(x)):
+        cap = f"✨ {series.upper()} - EP {ep}\n🎬 Quality: {quality}\n🚀 Powered by @MAKIMA6N_BOT"
         await query.message.reply_video(video=files[ep], caption=cap)
-
 # -------------------------
 # APP INITIALIZATION
 # -------------------------
