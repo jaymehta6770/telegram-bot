@@ -55,40 +55,39 @@ print("LOADED DB:", EPISODES)
 # AUTO SAVE FROM CHANNEL
 # -------------------------
 async def auto_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Agar channel post hai ya normal message, dono ko handle karega
+    # Channel post ya normal message
     msg = update.channel_post or update.message
     if not msg or not msg.caption:
         return
 
     caption = msg.caption.lower()
 
-# Pattern: name s01 ep01 720p
-match = re.search(
-    r"([\w_]+)\s*s(\d+)\s*ep(\d+)\s*(\d{3,4}p)",
-    caption
-)
+    # Pattern: name s01 ep01 720p
+    match = re.search(
+        r"([\w_]+)\s*s(\d+)\s*ep(\d+)\s*(\d{3,4}p)",
+        caption
+    )
 
-if not match:
-    return
+    if not match:
+        return
 
-series, season, ep, quality = match.groups()
-series = f"{series}_s{season}"
+    series, season, ep, quality = match.groups()
+    series = f"{series}_s{season}"
 
-file_id = None
-if msg.video:
-    file_id = msg.video.file_id
-elif msg.document:
-    file_id = msg.document.file_id
+    file_id = None
+    if msg.video:
+        file_id = msg.video.file_id
+    elif msg.document:
+        file_id = msg.document.file_id
 
-if not file_id:
-    return
+    if not file_id:
+        return
 
-EPISODES.setdefault(series, {}).setdefault(quality, {})
-EPISODES[series][quality][ep] = file_id
+    EPISODES.setdefault(series, {}).setdefault(quality, {})
+    EPISODES[series][quality][ep] = file_id
 
-save_db(EPISODES)
-print(f"Saved: {series} EP{ep} {quality}")
-
+    save_db(EPISODES)
+    print(f"Saved: {series} EP{ep} {quality}")
 # -------------------------
 # START COMMAND
 # -------------------------
