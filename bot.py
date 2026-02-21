@@ -94,7 +94,7 @@ async def auto_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
-        await update.message.reply_text("Welcome! Send series name in start link.")
+        await update.message.reply_text("Welcome! TO MY BOT.")
         return
 
     series = args[0].lower()
