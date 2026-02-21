@@ -10,7 +10,21 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
+from flask import Flask
+from threading import Thread
 
+app_web = Flask('')
+
+@app_web.route('/')
+def home():
+    return "Bot is alive!"
+
+def run_web():
+    app_web.run(host='0.0.0.0', port=10000)
+
+def keep_alive():
+    t = Thread(target=run_web)
+    t.start()
 # @BotFather se naya token lekar yahan dalein
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 DB_FILE = "database.json"
@@ -136,4 +150,5 @@ application.add_handler(MessageHandler(filters.ALL, auto_save))
 
 if __name__ == "__main__":
     print("Bot is starting on NEW SERVICE...")
+    keep_alive()
     application.run_polling()
