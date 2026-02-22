@@ -99,7 +99,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ================= WELCOME =================
     if not args:
-       await update.message.reply_text(
+        await update.message.reply_text(
             "✨ WELCOME TO MAKIMA ANIME BOT ✨\n\n"
             "🚀 Fast Episode Delivery\n"
             "🎬 Multi Quality Available\n"
@@ -109,12 +109,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "/start series_s01_ep3\n\n"
             "💖 Powered by @MAKIMA6N_BOT"
         )
+        return
 
     query = args[0].lower()
 
-    # =====================================================
-    # 🎯 SINGLE EPISODE MODE
-    # =====================================================
+    # ================= SINGLE EPISODE =================
     single_match = re.match(r"(.+)_ep(\d+)$", query)
 
     if single_match:
@@ -144,18 +143,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if not sent:
             await update.message.reply_text("❌ Episode not found.")
-
         return
 
-    # =====================================================
-    # 📺 FULL SEASON MODE
-    # =====================================================
-    async def handle_anime(update, context):
-        series = query  # આ બધી લાઈનો ૪ સ્પેસ અંદર હોવી જોઈએ
-        qualities = EPISODES.get(series)
+    # ================= FULL SEASON =================
+    series = query
+    qualities = EPISODES.get(series)
 
     if not qualities:
-        await update.message.reply_text("❌ Series not found in database.")
+        await update.message.reply_text("❌ Series not found.")
         return
 
     buttons = [
