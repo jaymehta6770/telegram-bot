@@ -159,11 +159,10 @@ if not qualities:
         await update.message.reply_text("❌ Series not found in database.")
         return
 
-    buttons = [
-        [InlineKeyboardButton(q, callback_data=f"{series}|{q}")]
-        for q in qualities.keys()
-    ]
-
+buttons = [
+    [InlineKeyboardButton(q, callback_data=f"{series}|{q}")]
+    for q in qualities.keys()
+]
     await update.message.reply_text(
         "🎬 Choose Quality:",
         reply_markup=InlineKeyboardMarkup(buttons)
