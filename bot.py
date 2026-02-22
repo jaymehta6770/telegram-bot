@@ -1,3 +1,4 @@
+🔥 Itachi uchiha 🔥, [2/22/2026 4:15 PM]
 import re
 import json
 import os
@@ -13,6 +14,9 @@ from telegram.ext import (
 from flask import Flask
 from threading import Thread
 
+# -------------------------
+# KEEP ALIVE (Render)
+# -------------------------
 app_web = Flask('')
 
 @app_web.route('/')
@@ -23,14 +27,14 @@ def run_web():
     app_web.run(host='0.0.0.0', port=10000)
 
 def keep_alive():
-    t = Thread(target=run_web)
-    t.start()
-# @BotFather se naya token lekar yahan dalein
+    Thread(target=run_web).start()
+
+# -------------------------
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 DB_FILE = "database.json"
 
 # -------------------------
-# Load database
+# LOAD DB
 # -------------------------
 def load_db():
     if not os.path.exists(DB_FILE):
@@ -42,7 +46,7 @@ def load_db():
             return {}
 
 # -------------------------
-# Save database
+# SAVE DB
 # -------------------------
 def save_db(data):
     with open(DB_FILE, "w") as f:
@@ -51,18 +55,17 @@ def save_db(data):
 EPISODES = load_db()
 print("LOADED DB:", EPISODES)
 
-# -------------------------
-# AUTO SAVE FROM CHANNEL
-# -------------------------
+# =========================================================
+# 🔥 AUTO SAVE FROM CHANNEL
+# =========================================================
 async def auto_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Channel post ya normal message
     msg = update.channel_post or update.message
     if not msg or not msg.caption:
         return
 
     caption = msg.caption.lower()
 
-    # Pattern: name s01 ep01 720p
+    # name s01 ep01 720p
     match = re.search(
         r"([\w_]+)\s*s(\d+)\s*ep(\d+)\s*(\d{3,4}p)",
         caption
@@ -88,47 +91,33 @@ async def auto_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     save_db(EPISODES)
     print(f"Saved: {series} EP{ep} {quality}")
-# -------------------------
-# START COMMAND
-# -------------------------
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = context.args
-    if not args:
-        await update.message.reply_text("Welcome! TO MY BOT.")
-        return
 
-    series = args[0].lower()
-    qualities = EPISODES.get(series)
-
-    if not qualities:
-        await update.message.reply_text("Series not found in database.")
-        return
-
-    buttons = []
-    for q in qualities.keys():
-        buttons.append([InlineKeyboardButton(q, callback_data=f"{series}|{q}")])
-
-    await update.message.reply_text(
-        "Choose Quality:",
-        reply_markup=InlineKeyboardMarkup(buttons)
-    )
-
+# =========================================================
+# 🚀 START COMMAND (PRO)
+# =========================================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
 
+    # ================= WELCOME =================
     if not args:
         await update.message.reply_text(
-            "Usage:\n"
-            "/start series_s01  → full season\n"
-            "/start series_s01_ep3 → single episode"
+            "✨ WELCOME TO MAKIMA ANIME BOT ✨\n\n"
+            "🎬 Fast Episode Delivery\n"
+            "⚡ Multi Quality Available\n"
+            "📦 Auto Updated Library\n\n"
+            "🔍 Usage:\n"
+            "/start series_s01\n"
+            "/start series_s01_ep3\n\n"
+            "💖 Powered by @MAKIMA6N_BOT",
+            parse_mode="Markdown"
         )
         return
 
     query = args[0].lower()
 
-    # -------------------------
-    # SINGLE EPISODE MODE
-    # -------------------------
+    # =====================================================
+    # 🎯 SINGLE EPISODE MODE
+    # =====================================================
     single_match = re.match(r"(.+)_ep(\d+)$", query)
 
     if single_match:
@@ -137,7 +126,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         qualities = EPISODES.get(series)
         if not qualities:
-            await update.message.reply_text("Series not found in database.")
+            await update.message.reply_text("❌ Series not found.")
             return
 
         sent = False
@@ -157,43 +146,72 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 sent = True
 
         if not sent:
-            await update.message.reply_text("Episode not found.")
+            await update.message.reply_text("❌ Episode not found.")
 
         return
 
-    # -------------------------
-    # FULL SEASON MODE
-    # -------------------------
+    # =====================================================
+    # 📺 FULL SEASON MODE
+    # =====================================================
     series = query
     qualities = EPISODES.get(series)
 
-    if not qualities:
-        await update.message.reply_text("Series not found in database.")
+🔥 Itachi uchiha 🔥, [2/22/2026 4:15 PM]
+if not qualities:
+        await update.message.reply_text("❌ Series not found in database.")
         return
 
-    buttons = []
-    for q in qualities.keys():
-        buttons.append(
-            [InlineKeyboardButton(q, callback_data=f"{series}|{q}")]
-        )
+    buttons = [
+        [InlineKeyboardButton(q, callback_data=f"{series}|{q}")]
+        for q in qualities.keys()
+    ]
 
     await update.message.reply_text(
-        "Choose Quality:",
+        "🎬 Choose Quality:",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
-# -------------------------
-# APP INITIALIZATION
-# -------------------------
-# Yahan 'application' use karna Render version ke liye zaroori hai
+
+# =========================================================
+# 📤 SEND FULL SEASON
+# =========================================================
+async def send_quality(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    series, quality = query.data.split("|")
+    files = EPISODES.get(series, {}).get(quality)
+
+    if not files:
+        await query.message.reply_text("❌ Episodes not found.")
+        return
+
+    await query.message.reply_text(f"🚀 Sending {quality} episodes...")
+
+    for ep in sorted(files.keys(), key=lambda x: int(x)):
+        cap = (
+            f"✨ {series.upper()} - EP {ep}\n"
+            f"🎬 Quality: {quality}\n"
+            f"💖 Powered by @MAKIMA6N_BOT"
+        )
+
+        await query.message.reply_video(
+            video=files[ep],
+            caption=cap
+        )
+
+# =========================================================
+# 🚀 APP INIT
+# =========================================================
 application = ApplicationBuilder().token(BOT_TOKEN).build()
 
-# Handlers
 application.add_handler(CommandHandler("start", start))
 application.add_handler(CallbackQueryHandler(send_quality))
-# Sabhi types ke messages/posts ke liye filters.ALL
 application.add_handler(MessageHandler(filters.ALL, auto_save))
 
-if __name__ == "__main__":
+# =========================================================
+# ▶️ MAIN
+# =========================================================
+if name == "main":
     print("Bot is starting on NEW SERVICE...")
     keep_alive()
     application.run_polling()
