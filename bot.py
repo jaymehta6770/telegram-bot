@@ -156,7 +156,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         series = query  # આ બધી લાઈનો ૪ સ્પેસ અંદર હોવી જોઈએ
         qualities = EPISODES.get(series)
 
-        if not qualities:
+    if not qualities:
         await update.message.reply_text("❌ Series not found in database.")
         return
 
