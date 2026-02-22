@@ -104,9 +104,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🎬 Fast Episode Delivery\n"
             "⚡ Multi Quality Available\n"
             "📦 Auto Updated Library\n\n"
-            "🔍 Usage:\n"
-            "/start series_s01\n"
-            "/start series_s01_ep3\n\n"
             "💖 Powered by @MAKIMA6N_BOT",
             parse_mode="Markdown"
         )
