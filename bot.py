@@ -188,7 +188,7 @@ application.add_handler(MessageHandler(filters.ALL, auto_save))
 # =========================================================
 # ▶️ MAIN (સુધારેલું name)
 # =========================================================
-if _name_ == "_main_":
+if __name__ == "__main__":
     print("Bot is starting...")
     keep_alive()
     application.run_polling()
