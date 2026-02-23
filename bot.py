@@ -1,62 +1,74 @@
 import re
+import json
 import os
-from pymongo import MongoClient
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
+    MessageHandler,
     CommandHandler,
     CallbackQueryHandler,
-    MessageHandler,
     ContextTypes,
     filters,
 )
+from flask import Flask
+from threading import Thread
+from pymongo import MongoClient # આ ડેટાબેઝ માટે જરૂરી છે
 
-# =====================================================
-# 🔐 ENV VARIABLES
-# =====================================================
+# -------------------------
+# KEEP ALIVE (Render)
+# -------------------------
+app_web = Flask('')
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-MONGO_URL = os.getenv("MONGO_URL")
+@app_web.route('/')
+def home():
+    return "Bot is alive!"
 
-if not BOT_TOKEN:
-    raise ValueError("❌ BOT_TOKEN not set in environment")
+def run_web():
+    app_web.run(host='0.0.0.0', port=10000)
 
-if not MONGO_URL:
-    raise ValueError("❌ MONGO_URL not set in environment")
+def keep_alive():
+    Thread(target=run_web).start()
 
-# =====================================================
-# 🍃 MongoDB Connect
-# =====================================================
+# -------------------------
+# SETTINGS & DATABASE
+# -------------------------
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+# અહીં તમારી MongoDB URL નાખો
+MONGO_URL = os.environ.get("MONGO_URL", "તમારી_URL_અહીં") 
 
 client = MongoClient(MONGO_URL)
-db = client["anime_bot"]
-collection = db["episodes"]
+db = client['anime_bot_db']
+collection = db['episodes']
 
-print("✅ MongoDB Connected")
+def load_db():
+    data = collection.find_one({"_id": "episodes_data"})
+    return data['content'] if data else {}
 
-# =====================================================
-# 💾 AUTO SAVE FROM CHANNEL
-# Caption format:
-# angelnextdoor s01 ep03 1080p
-# =====================================================
+def save_db(data):
+    collection.update_one(
+        {"_id": "episodes_data"},
+        {"$set": {"content": data}},
+        upsert=True
+    )
 
+EPISODES = load_db()
+
+# =========================================================
+# 🔥 AUTO SAVE FROM CHANNEL
+# =========================================================
 async def auto_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.channel_post or update.message
     if not msg or not msg.caption:
         return
 
     caption = msg.caption.lower()
-
-    match = re.search(
-        r"([\w_]+)\s*s(\d+)\s*ep(\d+)\s*(\d{3,4}p)",
-        caption,
-    )
+    match = re.search(r"([\w_]+)\s*s(\d+)\s*ep(\d+)\s*(\d{3,4}p)", caption)
 
     if not match:
         return
 
     series, season, ep, quality = match.groups()
-    series = series.lower()
+    series = f"{series}_s{season}"
 
     file_id = None
     if msg.video:
@@ -67,135 +79,116 @@ async def auto_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not file_id:
         return
 
-    collection.update_one(
-        {"series": series},
-        {
-            "$set": {
-                f"episodes.s{season}.ep{ep}.{quality}": file_id
-            }
-        },
-        upsert=True,
-    )
+    EPISODES.setdefault(series, {}).setdefault(quality, {})
+    EPISODES[series][quality][ep] = file_id
 
-    print(f"✅ Saved: {series} S{season} EP{ep} {quality}")
+    save_db(EPISODES) # આનાથી ડેટા કાયમી સેવ થશે
+    print(f"Saved: {series} EP{ep} {quality}")
 
-# =====================================================
-# 🚀 START COMMAND
-# =====================================================
-
+# =========================================================
+# 🚀 START COMMAND (તમારા ઓરિજિનલ મેસેજ સાથે)
+# =========================================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
 
     # ================= WELCOME =================
     if not args:
         await update.message.reply_text(
-            "✨ *WELCOME TO MAKIMA ANIME BOT* ✨\n\n"
-            "⚡ Fast Episode Delivery\n"
+            "✨ WELCOME TO MAKIMA ANIME BOT ✨\n\n"
+            "🚀 Fast Episode Delivery\n"
             "🎬 Multi Quality Available\n"
             "📚 Auto Updated Library\n\n"
             "🔍 Usage:\n"
-            "`/start series_s01`\n"
-            "`/start series_s01_ep03`\n\n"
-            "💖 Powered by @MAKIMA6N_BOT",
-            parse_mode="Markdown",
+            "/start series_s01\n"
+            "/start series_s01_ep3\n\n"
+            "💖 Powered by @MAKIMA6N_BOT"
         )
         return
 
     query = args[0].lower()
 
-    # ================= SINGLE EP =================
-    single_match = re.match(r"(.+)_s(\d+)_ep(\d+)", query)
+    # ================= SINGLE EPISODE MODE =================
+    single_match = re.match(r"(.+)_ep(\d+)$", query)
 
     if single_match:
-        series, season, ep = single_match.groups()
-        data = collection.find_one({"series": series})
+        series = single_match.group(1)
+        ep_req = single_match.group(2)
 
-        if not data:
+        qualities = EPISODES.get(series)
+        if not qualities:
             await update.message.reply_text("❌ Series not found.")
             return
 
-        try:
-            qualities = data["episodes"][f"s{season}"][f"ep{ep}"]
-        except KeyError:
-            await update.message.reply_text("❌ Episode not found.")
-            return
-
-        buttons = [
-            [
-                InlineKeyboardButton(
-                    q,
-                    callback_data=f"{series}|{season}|{ep}|{q}",
+        sent = False
+        for quality, eps in qualities.items():
+            if ep_req in eps:
+                cap = (
+                    f"✨ {series.upper()} - EP {ep_req}\n"
+                    f"🎬 Quality: {quality}\n"
+                    f"💖 Powered by @MAKIMA6N_BOT"
                 )
-            ]
-            for q in qualities.keys()
-        ]
+                await update.message.reply_video(video=eps[ep_req], caption=cap)
+                sent = True
 
-        await update.message.reply_text(
-            "🎬 Choose Quality:",
-            reply_markup=InlineKeyboardMarkup(buttons),
-        )
+        if not sent:
+            await update.message.reply_text("❌ Episode not found.")
         return
 
-    # ================= FULL SEASON =================
+    # ================= FULL SEASON MODE =================
+    series = query
+    qualities = EPISODES.get(series)
 
-    season_match = re.match(r"(.+)_s(\d+)", query)
-
-    if season_match:
-        series, season = season_match.groups()
-        data = collection.find_one({"series": series})
-
-        if not data:
-            await update.message.reply_text("❌ Series not found.")
-            return
-
-        try:
-            eps = data["episodes"][f"s{season}"]
-        except KeyError:
-            await update.message.reply_text("❌ Season not found.")
-            return
-
-        text = "📺 Available Episodes:\n\n"
-        for ep in sorted(eps.keys()):
-            text += f"👉 /start {series}_s{season}_{ep}\n"
-
-        await update.message.reply_text(text)
+    if not qualities:
+        await update.message.reply_text("❌ Series not found.")
         return
+        # અહીં Indentation સુધારેલી છે
+    buttons = [
+        [InlineKeyboardButton(q, callback_data=f"{series}|{q}")]
+        for q in qualities.keys()
+    ]
 
-# =====================================================
-# 🎬 SEND VIDEO
-# =====================================================
+    await update.message.reply_text(
+        "🎬 Choose Quality:",
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
 
+# =========================================================
+# 📤 SEND FULL SEASON
+# =========================================================
 async def send_quality(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    series, season, ep, quality = query.data.split("|")
+    series, quality = query.data.split("|")
+    files = EPISODES.get(series, {}).get(quality)
 
-    data = collection.find_one({"series": series})
-    file_id = data["episodes"][f"s{season}"][f"ep{ep}"][quality]
+    if not files:
+        await query.message.reply_text("❌ Episodes not found.")
+        return
 
-    await query.message.reply_video(
-        video=file_id,
-        caption=(
-            f"✨ {series.upper()} S{season} EP{ep}\n"
+    await query.message.reply_text(f"🚀 Sending {quality} episodes...")
+
+    for ep in sorted(files.keys(), key=lambda x: int(x)):
+        cap = (
+            f"✨ {series.upper()} - EP {ep}\n"
             f"🎬 Quality: {quality}\n"
             f"💖 Powered by @MAKIMA6N_BOT"
-        ),
-    )
+        )
+        await query.message.reply_video(video=files[ep], caption=cap)
 
-# =====================================================
-# 🚀 MAIN
-# =====================================================
+# =========================================================
+# 🚀 APP INIT
+# =========================================================
+application = ApplicationBuilder().token(BOT_TOKEN).build()
 
-def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+application.add_handler(CommandHandler("start", start))
+application.add_handler(CallbackQueryHandler(send_quality))
+application.add_handler(MessageHandler(filters.ALL, auto_save))
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(send_quality))
-    app.add_handler(MessageHandler(filters.ALL, auto_save))
-
-    print("🚀 Bot Started...")
-    app.run_polling()
-
-if __name__ == "__main__":
-    main()
+# =========================================================
+# ▶️ MAIN (સુધારેલું name)
+# =========================================================
+if name == "main": # અહીં ભૂલ હતી, હવે સુધારી છે
+    print("Bot is starting...")
+    keep_alive()
+    application.run_polling()
