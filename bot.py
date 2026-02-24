@@ -209,7 +209,7 @@ application.add_handler(MessageHandler(filters.VIDEO, save_video))
 # =====================================================
 # ▶️ MAIN
 # =====================================================
-if name == "main":
+if __name__ == "__main__":
     print("Bot is starting...")
     keep_alive()
     application.run_polling()
