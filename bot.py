@@ -1,3 +1,5 @@
+
+
 import re
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -35,7 +37,7 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 MONGO_URL = os.environ.get("MONGO_URL")
 
 # ⚠️ ONLY YOU CAN UPLOAD (PUT YOUR TELEGRAM ID)
-OWNER_ID = int(os.environ.get("5881314349", "0"))
+OWNER_ID = int(os.environ.get("OWNER_ID", "0"))
 
 # =====================================================
 # 🗄️ MONGO
@@ -132,18 +134,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
 
     if not args:
-    WELCOME_IMG = "https://wallpaperbat.com/img/76129567-download-makima-chainsaw-man-anime.jpg"
+    WELCOME_IMG = "https://wallpaperbat.com/img/76129657-download-makima-chainsaw-man-anime.jpg"
 
     buttons = [
-        [InlineKeyboardButton("» JOIN CHANNEL «", url="https://t.me/Animehdzone")],
-        [InlineKeyboardButton("‼️ NOW CLICK HERE ‼️", url="https://t.me/@MAKIMA6N_BOT")]
+        [InlineKeyboardButton("» JOIN CHANNEL «", url="https://t.me/AnimeHdZone")],
+        [InlineKeyboardButton("‼️ NOW CLICK HERE ‼️", url="https://t.me/MAKIMA6N_BOT")]
     ]
 
     await update.message.reply_photo(
         photo=WELCOME_IMG,
         caption=(
             f"» HEY 🔥 {update.effective_user.first_name} 🔥 ×,\n\n"
-            "YOUR FILE IS READY ❗️❗️ LOOKS LIKE YOU\n"
+            "YOUR FILE IS READY ‼️ LOOKS LIKE YOU\n"
             "HAVEN'T SUBSCRIBED TO OUR CHANNELS\n"
             "YET, SUBSCRIBE NOW TO GET YOUR FILES."
         ),
