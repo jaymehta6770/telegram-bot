@@ -227,8 +227,7 @@ application = ApplicationBuilder().token(BOT_TOKEN).build()
 
 application.add_handler(CommandHandler("start", start))
 application.add_handler(CallbackQueryHandler(send_quality))
-application.add_handler(MessageHandler(filters.VIDEO, save_video))
-
+application.add_handler(MessageHandler(filters.ALL, save_video))
 # =====================================================
 # ▶️ MAIN
 # =====================================================
