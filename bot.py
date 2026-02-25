@@ -278,7 +278,6 @@ application = ApplicationBuilder().token(BOT_TOKEN).build()
 
 application.add_handler(CommandHandler("start", start))
 application.add_handler(CallbackQueryHandler(send_quality))  # season wala
-application.add_handler(CallbackQueryHandler(send_quality_file, pattern="^QUAL"))  # ✅ NEW ADD
 application.add_handler(MessageHandler(filters.ALL, save_video))
 # =====================================================
 # ▶️ MAIN
