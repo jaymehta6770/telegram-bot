@@ -139,7 +139,7 @@ async def save_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global EPISODES
 
-    
+    try:
         args = context.args
         msg = update.message
 
