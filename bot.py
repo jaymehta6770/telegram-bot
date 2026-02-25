@@ -164,6 +164,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             EPISODES = load_db()
 
         query = args[0].lower()
+        except Exception as e:
+            print("Start error:", e)
 
         # =====================================================
         # 🎯 DIRECT QUALITY LINK
