@@ -218,7 +218,38 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         )
                         await msg.reply_video(video=file_id, caption=cap)
                     return
+# =====================================================
+# 📺 FULL SEASON ONE QUALITY
+# example: title_s01_720p
+# =====================================================
+season_quality = re.match(r"(.+)_s(\d+)_(\d+p)", query)
 
+if season_quality:
+    title, s_num, quality = season_quality.groups()
+
+    s_key = f"S{s_num.zfill(2)}"
+    series = EPISODES.get(title)
+
+    if series:
+        season_data = series.get(s_key)
+
+        if season_data:
+            sent = False
+
+            for ep in sorted(season_data.keys()):
+                file_id = season_data[ep].get(quality)
+
+                if file_id:
+                    sent = True
+                    cap = (
+                        f"✨ {pretty_name(title)} [{s_key}][{ep}]\n"
+                        f"🎬 Quality: {quality}\n"
+                        f"💖 Powered by @MAKIMA6N_BOT"
+                    )
+                    await msg.reply_video(video=file_id, caption=cap)
+
+            if sent:
+                return
         # =====================================================
         # 📺 TITLE SEARCH → SHOW SEASONS
         # =====================================================
