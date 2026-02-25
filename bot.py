@@ -13,6 +13,12 @@ from flask import Flask
 from threading import Thread
 from pymongo import MongoClient
 
+def clean_key(name: str):
+    return re.sub(r'[^a-z0-9]+', '_', name.lower()).strip('_')
+
+def pretty_name(name: str):
+    return name.replace('_', ' ').title()
+    
 # =====================================================
 # 🌐 KEEP ALIVE (Render)
 # =====================================================
@@ -72,12 +78,12 @@ async def save_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not message:
         return
 
-    # 🔒 only owner upload (safe)
+    # 🔒 only owner upload
     if OWNER_ID and message.from_user:
         if message.from_user.id != OWNER_ID:
             return
 
-    # 🎬 get file id (video or document)
+    # 🎬 get file id
     file_id = None
     if message.video:
         file_id = message.video.file_id
@@ -95,7 +101,7 @@ async def save_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parts = [x.strip() for x in caption_text.split("|")]
 
         title = parts[0]
-        key = title.lower().replace(" ", "")
+        key = clean_key(title)  # ✅ VERY IMPORTANT FIX
 
         # 🎬 MOVIE
         if parts[1].upper() == "MOVIE":
@@ -124,7 +130,6 @@ async def save_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         print("❌ Save error:", e)
-
 # =====================================================
 # 🚀 START COMMAND
 # =====================================================
